@@ -10,7 +10,7 @@ import {
   TokenAmount,
   Trade,
   TradeType,
-  WETH
+  WRAPPED_NATIVE
 } from '../src'
 
 describe('Trade', () => {
@@ -26,7 +26,7 @@ describe('Trade', () => {
   const pair_1_3 = new Pair(new TokenAmount(token1, JSBI.BigInt(1200)), new TokenAmount(token3, JSBI.BigInt(1300)))
 
   const pair_weth_0 = new Pair(
-    new TokenAmount(WETH[ChainId.MAINNET], JSBI.BigInt(1000)),
+    new TokenAmount(WRAPPED_NATIVE[ChainId.MAINNET], JSBI.BigInt(1000)),
     new TokenAmount(token0, JSBI.BigInt(1000))
   )
 
@@ -35,7 +35,7 @@ describe('Trade', () => {
   it('can be constructed with ETHER as input', () => {
     const trade = new Trade(
       new Route([pair_weth_0], ETHER),
-      CurrencyAmount.ether(JSBI.BigInt(100)),
+      CurrencyAmount.native(JSBI.BigInt(100), 1),
       TradeType.EXACT_INPUT
     )
     expect(trade.inputAmount.currency).toEqual(ETHER)
@@ -54,7 +54,7 @@ describe('Trade', () => {
   it('can be constructed with ETHER as output', () => {
     const trade = new Trade(
       new Route([pair_weth_0], token0, ETHER),
-      CurrencyAmount.ether(JSBI.BigInt(100)),
+      CurrencyAmount.native(JSBI.BigInt(100), 1),
       TradeType.EXACT_OUTPUT
     )
     expect(trade.inputAmount.currency).toEqual(token0)
@@ -150,15 +150,15 @@ describe('Trade', () => {
     it('works for ETHER currency input', () => {
       const result = Trade.bestTradeExactIn(
         [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
-        CurrencyAmount.ether(JSBI.BigInt(100)),
+        CurrencyAmount.native(JSBI.BigInt(100), 1),
         token3
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(ETHER)
-      expect(result[0].route.path).toEqual([WETH[ChainId.MAINNET], token0, token1, token3])
+      expect(result[0].route.path).toEqual([WRAPPED_NATIVE[ChainId.MAINNET], token0, token1, token3])
       expect(result[0].outputAmount.currency).toEqual(token3)
       expect(result[1].inputAmount.currency).toEqual(ETHER)
-      expect(result[1].route.path).toEqual([WETH[ChainId.MAINNET], token0, token3])
+      expect(result[1].route.path).toEqual([WRAPPED_NATIVE[ChainId.MAINNET], token0, token3])
       expect(result[1].outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
@@ -169,10 +169,10 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(token3)
-      expect(result[0].route.path).toEqual([token3, token0, WETH[ChainId.MAINNET]])
+      expect(result[0].route.path).toEqual([token3, token0, WRAPPED_NATIVE[ChainId.MAINNET]])
       expect(result[0].outputAmount.currency).toEqual(ETHER)
       expect(result[1].inputAmount.currency).toEqual(token3)
-      expect(result[1].route.path).toEqual([token3, token1, token0, WETH[ChainId.MAINNET]])
+      expect(result[1].route.path).toEqual([token3, token1, token0, WRAPPED_NATIVE[ChainId.MAINNET]])
       expect(result[1].outputAmount.currency).toEqual(ETHER)
     })
   })
@@ -185,21 +185,21 @@ describe('Trade', () => {
         TradeType.EXACT_INPUT
       )
       it('throws if less than 0', () => {
-        expect(() => exactIn.maximumAmountIn(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)))).toThrow(
+        expect(() => exactIn.maximumAmountIn(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)), 1)).toThrow(
           'SLIPPAGE_TOLERANCE'
         )
       })
       it('returns exact if 0', () => {
-        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(exactIn.inputAmount)
+        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(exactIn.inputAmount)
       })
       it('returns exact if nonzero', () => {
-        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(100))
         )
-        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(100))
         )
-        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.maximumAmountIn(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(100))
         )
       })
@@ -212,21 +212,21 @@ describe('Trade', () => {
       )
 
       it('throws if less than 0', () => {
-        expect(() => exactOut.maximumAmountIn(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)))).toThrow(
+        expect(() => exactOut.maximumAmountIn(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)), 1)).toThrow(
           'SLIPPAGE_TOLERANCE'
         )
       })
       it('returns exact if 0', () => {
-        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(exactOut.inputAmount)
+        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(exactOut.inputAmount)
       })
       it('returns slippage amount if nonzero', () => {
-        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(156))
         )
-        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(163))
         )
-        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.maximumAmountIn(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token0, JSBI.BigInt(468))
         )
       })
@@ -241,21 +241,21 @@ describe('Trade', () => {
         TradeType.EXACT_INPUT
       )
       it('throws if less than 0', () => {
-        expect(() => exactIn.minimumAmountOut(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)))).toThrow(
+        expect(() => exactIn.minimumAmountOut(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)), 1)).toThrow(
           'SLIPPAGE_TOLERANCE'
         )
       })
       it('returns exact if 0', () => {
-        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(exactIn.outputAmount)
+        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(exactIn.outputAmount)
       })
       it('returns exact if nonzero', () => {
-        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(69))
         )
-        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(65))
         )
-        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)))).toEqual(
+        expect(exactIn.minimumAmountOut(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(23))
         )
       })
@@ -268,21 +268,21 @@ describe('Trade', () => {
       )
 
       it('throws if less than 0', () => {
-        expect(() => exactOut.minimumAmountOut(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)))).toThrow(
+        expect(() => exactOut.minimumAmountOut(new Percent(JSBI.BigInt(-1), JSBI.BigInt(100)), 1)).toThrow(
           'SLIPPAGE_TOLERANCE'
         )
       })
       it('returns exact if 0', () => {
-        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(exactOut.outputAmount)
+        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(exactOut.outputAmount)
       })
       it('returns slippage amount if nonzero', () => {
-        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(0), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(100))
         )
-        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(5), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(100))
         )
-        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)))).toEqual(
+        expect(exactOut.minimumAmountOut(new Percent(JSBI.BigInt(200), JSBI.BigInt(100)), 1)).toEqual(
           new TokenAmount(token2, JSBI.BigInt(100))
         )
       })
@@ -380,24 +380,24 @@ describe('Trade', () => {
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(ETHER)
-      expect(result[0].route.path).toEqual([WETH[ChainId.MAINNET], token0, token1, token3])
+      expect(result[0].route.path).toEqual([WRAPPED_NATIVE[ChainId.MAINNET], token0, token1, token3])
       expect(result[0].outputAmount.currency).toEqual(token3)
       expect(result[1].inputAmount.currency).toEqual(ETHER)
-      expect(result[1].route.path).toEqual([WETH[ChainId.MAINNET], token0, token3])
+      expect(result[1].route.path).toEqual([WRAPPED_NATIVE[ChainId.MAINNET], token0, token3])
       expect(result[1].outputAmount.currency).toEqual(token3)
     })
     it('works for ETHER currency output', () => {
       const result = Trade.bestTradeExactOut(
         [pair_weth_0, pair_0_1, pair_0_3, pair_1_3],
         token3,
-        CurrencyAmount.ether(JSBI.BigInt(100))
+        CurrencyAmount.native(JSBI.BigInt(100), 1)
       )
       expect(result).toHaveLength(2)
       expect(result[0].inputAmount.currency).toEqual(token3)
-      expect(result[0].route.path).toEqual([token3, token0, WETH[ChainId.MAINNET]])
+      expect(result[0].route.path).toEqual([token3, token0, WRAPPED_NATIVE[ChainId.MAINNET]])
       expect(result[0].outputAmount.currency).toEqual(ETHER)
       expect(result[1].inputAmount.currency).toEqual(token3)
-      expect(result[1].route.path).toEqual([token3, token1, token0, WETH[ChainId.MAINNET]])
+      expect(result[1].route.path).toEqual([token3, token1, token0, WRAPPED_NATIVE[ChainId.MAINNET]])
       expect(result[1].outputAmount.currency).toEqual(ETHER)
     })
   })

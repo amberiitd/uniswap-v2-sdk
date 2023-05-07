@@ -56,7 +56,18 @@ export function currencyEquals(currencyA: Currency, currencyB: Currency): boolea
   }
 }
 
-export const WETH = {
+export const NATIVE_TOKENS: {
+  readonly [chainId in ChainId]: Currency
+} = {
+  [ChainId.MUMBAI]: Currency.MATIC,
+  [ChainId.MAINNET]: Currency.ETHER,
+  [ChainId.ROPSTEN]: Currency.ETHER,
+  [ChainId.RINKEBY]: Currency.ETHER,
+  [ChainId.GÖRLI]: Currency.ETHER,
+  [ChainId.KOVAN]: Currency.ETHER
+}
+
+export const WRAPPED_NATIVE = {
   [ChainId.MAINNET]: new Token(
     ChainId.MAINNET,
     '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -79,5 +90,12 @@ export const WETH = {
     'Wrapped Ether'
   ),
   [ChainId.GÖRLI]: new Token(ChainId.GÖRLI, '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6', 18, 'WETH', 'Wrapped Ether'),
-  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether')
+  [ChainId.KOVAN]: new Token(ChainId.KOVAN, '0xd0A1E359811322d97991E03f863a0C30C2cF029C', 18, 'WETH', 'Wrapped Ether'),
+  [ChainId.MUMBAI]: new Token(
+    ChainId.MUMBAI,
+    '0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889',
+    18,
+    'WMATIC',
+    'Wrapped Matic'
+  )
 }

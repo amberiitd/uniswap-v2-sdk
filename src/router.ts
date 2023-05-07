@@ -1,7 +1,7 @@
-import { TradeType } from './constants'
+import { ChainId, TradeType } from './constants'
 import invariant from 'tiny-invariant'
 import { validateAndParseAddress } from './utils'
-import { CurrencyAmount, ETHER, Percent, Trade } from './entities'
+import { CurrencyAmount, NATIVE_TOKENS, Percent, Trade } from './entities'
 
 /**
  * Options for producing the arguments to send call to the router.
@@ -73,16 +73,16 @@ export abstract class Router {
    * @param trade to produce call parameters for
    * @param options options for the call parameters
    */
-  public static swapCallParameters(trade: Trade, options: TradeOptions | TradeOptionsDeadline): SwapParameters {
-    const etherIn = trade.inputAmount.currency === ETHER
-    const etherOut = trade.outputAmount.currency === ETHER
+  public static swapCallParameters(chainId: ChainId, trade: Trade, options: TradeOptions | TradeOptionsDeadline): SwapParameters {
+    const etherIn = trade.inputAmount.currency === NATIVE_TOKENS[chainId]
+    const etherOut = trade.outputAmount.currency === NATIVE_TOKENS[chainId]
     // the router does not support both ether in and out
     invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     invariant(!('ttl' in options) || options.ttl > 0, 'TTL')
 
     const to: string = validateAndParseAddress(options.recipient)
-    const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage))
-    const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage))
+    const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage, chainId))
+    const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage, chainId))
     const path: string[] = trade.route.path.map(token => token.address)
     const deadline =
       'ttl' in options
