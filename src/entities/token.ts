@@ -60,6 +60,7 @@ export const NATIVE_TOKENS: {
   readonly [chainId in ChainId]: Currency
 } = {
   [ChainId.MUMBAI]: Currency.MATIC,
+  [ChainId.FILECOIN]: Currency.TFIL,
   [ChainId.MAINNET]: Currency.ETHER,
   [ChainId.ROPSTEN]: Currency.ETHER,
   [ChainId.RINKEBY]: Currency.ETHER,
@@ -97,5 +98,12 @@ export const WRAPPED_NATIVE = {
     18,
     'WMATIC',
     'Wrapped Matic'
+  ),
+  [ChainId.FILECOIN]: new Token(
+    ChainId.FILECOIN,
+    '0x87e940bF5c8FC26ad9F80985D23176D21646423E',
+    18,
+    'WTFIL',
+    'Wrapped FTIL'
   )
 }

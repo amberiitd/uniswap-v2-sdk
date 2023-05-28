@@ -18,6 +18,7 @@ export class Currency {
    */
   public static readonly ETHER: Currency = new Currency(18, 'ETH', 'Ether')
   public static readonly MATIC: Currency = new Currency(18, 'MATIC', 'Matic')
+  public static readonly TFIL: Currency = new Currency(18, 'TFIL', 'Tfil')
 
   /**
    * Constructs an instance of the base class `Currency`. The only instance of the base class `Currency` is `Currency.ETHER`.
